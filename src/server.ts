@@ -24,6 +24,22 @@ app.post('/users', async (request, reply) => {
   return reply.status(201).send();
 });
 
+app.delete('/users', async (request, reply) => {
+  const deleteUserSchema = z.object({
+    id: z.string(),
+  });
+
+  const { id } = deleteUserSchema.parse(request.query);
+
+  const user = await prismaClient.user.findUnique({ where: { id } });
+
+  if (!user) return reply.status(400).send({ error: 'Does not exists user with this id.' });
+
+  await prismaClient.user.delete({ where: { id } });
+
+  return reply.status(200).send();
+});
+
 app.listen({
   host: '0.0.0.0',
   port: process.env.PORT ? Number(process.env.PORT) : 3333
